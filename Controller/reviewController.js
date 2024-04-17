@@ -4,10 +4,11 @@ const review =require('../models/ReviewSchema')
  exports.addReview =async (req,res)=>{
     console.log("inside add review function")
     const user=req.payload
-     const doctor=req.payload
-     console.log(doctor);
+     
+     
     
-    const {reviewText,rating}=req.body
+    const {reviewText,rating,doctor}=req.body
+    console.log(doctor);
     //console.log()
    
 
@@ -33,8 +34,10 @@ exports.allReviews=async(req,res)=>
 {
     console.log("get review section");
     const user=req.payload
+    const {doctor:doctor}=req.body
+    console.log(doctor);
     try{
-        const allReview=await review.find({user})
+        const allReview=await review.find({doctor})
         res.status(200).json(allReview)
 
     }
