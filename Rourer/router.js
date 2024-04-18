@@ -34,7 +34,11 @@ router.get("/doctor/:id",doctorcontroller.getADoctor)
 
 //booking
 
-router.post("/checkout/:doctorId",jwtMiddleware,bookingcontroller.getCheckOutSession)
+router.post("/booking/:id",jwtMiddleware,bookingcontroller.createBooking)
+
+//getbooking
+
+router.get("/user/bookings",jwtMiddleware,bookingcontroller.getBookingsByUserId);
 
 
 module.exports=router

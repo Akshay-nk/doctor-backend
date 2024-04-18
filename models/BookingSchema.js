@@ -1,35 +1,36 @@
-const mongoose =require("mongoose");
+// Booking.js
+
+const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
   {
     doctor: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Doctor",
       required: true,
     },
     user: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    ticketPrice: { type: String, required: true },
     appointmentDate: {
       type: Date,
-      required: true,
+     // required: true,
     },
-    status: {
-      type: String,
-      enum: ["pending", "approved", "cancelled"],
-      default: "pending",
-    },
-    isPaid: {
-      type: Boolean,
-      default: true,
-    },
+    // status: {
+    //   type: String,
+    //   enum: ["pending", "approved", "cancelled"],
+    //   default: "pending",
+    // },
+    // isPaid: {
+    //   type: Boolean,
+    //   default: true,
+    // },
   },
   { timestamps: true }
 );
 
-const booking = mongoose.model('booking',bookingSchema)
+const Booking = mongoose.model('Booking', bookingSchema);
 
-module.exports=booking;
+module.exports = Booking;

@@ -1,62 +1,71 @@
 const User = require('../models/UserSchema')
 const Doctor = require('../models/DoctorSchema');
-const Booking = require("../models/BookingSchema");
+// bookingController.js
 
-const Stripe = require('stripe')
+const Booking = require('../models/BookingSchema');
 
+// Create a new booking
+const createBooking = async (req,res) => {
+  console.log("inside createBooking");
+  try {
+    const { appointmentDate } = req.body;
+    console.log(req.body);
+    // Create a new booking instance
+    const booking = new Booking({
+      doctor: req.params.id,
+      user: req.payload,
 
-exports.getCheckOutSession = async (req, res) => {
-    console.log("inside booking controlleer");
+      appointmentDate
+    });
 
+    console.log(booking);
+    
+
+    // Save the booking to the database
+    const savedBooking = await booking.save();
+    
+
+    res.status(201).json(savedBooking); // Return the saved booking
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get booking by ID
+const getBookingsByUserId = async (req, res) => {
     try {
+        const userId = req.payload; // Extract user ID from request parameters
+        const bookings = await Booking.find({ user: userId });
         
-        const doctor = await Doctor.findById(req.params.doctorId)
-        const user = await User.findById(req.payload)
-        // console.log(doctor,user)
-
-        const stripe = new Stripe(process.env.STRIPE_SECRECT_KEY)
-
-        //creatting checkout session
-
-        const session = await stripe.checkout.session.create({
-            payment_method_types: ['card'],
-            mode: 'payment',
-            success_url: `${process.env.DOMAIN}/success`,
-            cancel_url: `${req.protocol}://${req.get("host")}/doctor/${doctor.doctorId}`,
-            line_items: [{
-                price_data: {
-                    currency: "usd",
-                    unit_amount: doctor.ticketPrice + 100,
-                    product_data: {
-                        name: doctor.name,
-                        description: doctor.bio,
-                        images: [doctor.photo]
-                    }
-                }, quantity: 1
+        if (!bookings || bookings.length === 0) {
+            return res.status(404).json({ message: 'No bookings found for this user' });
+        }
+        
+        const bookingsWithUser = await Promise.all(bookings.map(async booking => {
+            // Find user for each booking
+            const user = await User.findById(booking.user);
+            const doctor=await Doctor.findById(booking.doctor)
+            if (!user) {
+                return null; // Or handle the case where user is not found
             }
-            ]
-
-        })
-
-        console.log(session);
-
-        //create new booking
-
-        const Booking = new Booking({
-            doctor: doctor._id,
-            user: user._id,
-            ticketPrice: doctor.ticketPrice,
-            session: session.id
-        })
-
-        await Booking.save()
-        res.status(200).json({url:session.url})
-
-
-
-
-
+            return {
+                _id: booking._id,
+                doctor: doctor,
+                user: user,
+                appointmentDate: booking.appointmentDate,
+                createdAt: booking.createdAt,
+                updatedAt: booking.updatedAt
+            };
+        }));
+        
+        res.json(bookingsWithUser.filter(booking => booking !== null)); // Filter out null values
     } catch (error) {
-        res.status(401).json("checkout error")
+        res.status(500).json({ message: error.message });
     }
-}
+};
+
+module.exports = {
+  createBooking,
+  getBookingsByUserId
+};
