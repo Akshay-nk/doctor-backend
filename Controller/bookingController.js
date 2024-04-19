@@ -25,7 +25,7 @@ const createBooking = async (req,res) => {
     const savedBooking = await booking.save();
     
 
-    res.status(201).json(savedBooking); // Return the saved booking
+    res.status(200).json(savedBooking); // Return the saved booking
 
   } catch (error) {
     res.status(500).json({ message: error.message });
